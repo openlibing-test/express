@@ -1,9 +1,12 @@
 name: ESLint full scan to openLiBing
 
+# Original triggers preserved; manual-only for test cost control.
+# on:
+#   workflow_dispatch:
+#   push:
+#     branches: ["codex/eslint-openlibing-validation"]
 on:
   workflow_dispatch:
-  push:
-    branches: ["codex/eslint-openlibing-validation"]
 
 permissions:
   contents: read
