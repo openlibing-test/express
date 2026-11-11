@@ -1,9 +1,12 @@
 name: Publish package to npm
 
+# Original triggers preserved; manual-only for test cost control.
+# on:
+#   release:
+#     # "created" does not fire when a draft release is published, "published" does
+#     types: [published]
 on:
-  release:
-    # "created" does not fire when a draft release is published, "published" does
-    types: [published]
+  workflow_dispatch:
 
 concurrency:
   group: "${{ github.workflow }} ✨ ${{ github.ref }}"
