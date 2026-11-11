@@ -67,7 +67,7 @@
     "cookie-parser": "1.4.7",
     "cookie-session": "2.1.1",
     "ejs": "^3.1.10",
-    "eslint": "8.47.0",
+    "eslint": "9.10.0",
     "express-session": "^1.18.1",
     "hbs": "4.4.0",
     "marked": "^15.0.3",
@@ -77,7 +77,10 @@
     "nyc": "^17.1.0",
     "pbkdf2-password": "1.2.1",
     "supertest": "^6.3.0",
-    "vhost": "~3.0.2"
+    "vhost": "~3.0.2",
+    "@eslint/js": "9.10.0",
+    "globals": "^17.14.0",
+    "@microsoft/eslint-formatter-sarif": "3.1.0"
   },
   "engines": {
     "node": ">= 18"
@@ -94,6 +97,7 @@
     "test": "mocha --require test/support/env --reporter spec --check-leaks test/ test/acceptance/",
     "test-ci": "nyc --exclude examples --exclude test --exclude benchmarks --reporter=lcovonly --reporter=text npm test",
     "test-cov": "nyc --exclude examples --exclude test --exclude benchmarks --reporter=html --reporter=text npm test",
-    "test-tap": "mocha --require test/support/env --reporter tap --check-leaks test/ test/acceptance/"
+    "test-tap": "mocha --require test/support/env --reporter tap --check-leaks test/ test/acceptance/",
+    "lint:sarif": "eslint . --format @microsoft/eslint-formatter-sarif --output-file reports/eslint.sarif"
   }
 }

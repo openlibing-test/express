@@ -1,0 +1,45 @@
+name: ESLint full scan to openLiBing
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["codex/eslint-openlibing-validation"]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Scan repository
+        run: |
+          rm -f reports/eslint.sarif
+          mkdir -p reports
+          set +e
+          npx eslint . --format @microsoft/eslint-formatter-sarif --output-file reports/eslint.sarif
+          code=$?
+          set -e
+          if [ "$code" -gt 1 ]; then exit "$code"; fi
+          test -s reports/eslint.sarif
+          node -e 'const fs = require("fs"); const s = JSON.parse(fs.readFileSync("reports/eslint.sarif")); console.log(`SARIF ${s.version}: ${s.runs.reduce((n, r) => n + (r.results || []).length, 0)} results`);'
+      - name: Save SARIF artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-sarif
+          path: reports/eslint.sarif
+          if-no-files-found: error
+      - name: Upload SARIF to openLiBing
+        uses: openlibing-test/upload-sarif-action@source-platform-detection
+        with:
+          sarif_file: reports/eslint.sarif
+          source_path: .
+          category: express-eslint-validation
+          env_type: beta
