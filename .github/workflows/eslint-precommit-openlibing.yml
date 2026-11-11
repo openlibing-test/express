@@ -1,0 +1,53 @@
+name: ESLint pre-commit to openLiBing
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["codex/eslint-openlibing-validation"]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: |
+          python -m pip install pre-commit
+          npm install --ignore-scripts --no-audit --no-fund
+          mkdir -p /tmp/pre-commit-reports
+      - name: Run pre-commit
+        id: pre-commit
+        uses: openlibing-test/pre-commit-action@main
+        with:
+          extra_args: '--all-files'
+          report-dir: /tmp/pre-commit-reports/
+      - name: Inspect SARIF
+        if: ${{ always() }}
+        run: |
+          test -s /tmp/pre-commit-reports/eslint.sarif
+          node -e 'const fs = require("fs"); const s = JSON.parse(fs.readFileSync("/tmp/pre-commit-reports/eslint.sarif")); console.log(`SARIF ${s.version}: ${s.runs.reduce((n, r) => n + (r.results || []).length, 0)} results`);'
+      - name: Save SARIF artifact
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-precommit-sarif
+          path: /tmp/pre-commit-reports/eslint.sarif
+          if-no-files-found: error
+      - name: Upload SARIF to openLiBing
+        if: ${{ always() }}
+        uses: openlibing-test/upload-sarif-action@source-platform-detection
+        with:
+          sarif_file: ${{ steps.pre-commit.outputs.sarif-files }}
+          source_path: .
+          env_type: beta
+          category: express-eslint-precommit-validation
