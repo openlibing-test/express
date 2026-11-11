@@ -1,15 +1,18 @@
 name: iojs-ci
 
+# Original triggers preserved; manual-only for test cost control.
+# on:
+#   push:
+#     branches:
+#       - master
+#       - '4.x'
+#     paths-ignore:
+#       - '*.md'
+#   pull_request:
+#     paths-ignore:
+#       - '*.md'
 on:
-  push:
-    branches:
-      - master
-      - '4.x'
-    paths-ignore:
-      - '*.md'
-  pull_request:
-    paths-ignore:
-      - '*.md'
+  workflow_dispatch:
 
 concurrency:
   group: "${{ github.workflow }} ✨ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
